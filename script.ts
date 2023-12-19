@@ -201,7 +201,6 @@ class Group {
     //"ESNext.Array",
     //"DOM",
     //"ESNext",
-    //"etc..."
     //]
     showPerformance(): Student[] {
         const sortedStudents = this._students.toSorted((a, b) => b.getPerformanceRating() - a.getPerformanceRating());
