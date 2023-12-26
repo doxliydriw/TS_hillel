@@ -1,307 +1,219 @@
-class School
+// Enum для domainArea
+enum DomainArea
 {
-    // implement 'add area', 'remove area', 'add lecturer', and 'remove lecturer' methods
-
-    _areas: Area[] = [];
-    _lecturers: Lecturer[] = []; // Name, surname, position, company, experience, courses, contacts
-
-    get areas (): Area[]
-    {
-        return this._areas;
-    }
-
-    get lecturers (): Lecturer[]
-    {
-        return this._lecturers;
-    }
-
-    addArea ( area: Area ): void
-    {
-        this._areas.push( area );
-    }
-
-    removeArea ( area: Area ): void
-    {
-        const index = this._areas.indexOf( area );
-        if ( index !== -1 ) {
-            this._areas.splice( index, 1 );
-        }
-    }
-
-    addLecturer ( lecturer: Lecturer ): void
-    {
-        this._lecturers.push( lecturer );
-    }
-
-    removeLecturer ( lecturer: Lecturer ): void
-    {
-        const index = this._lecturers.indexOf( lecturer );
-        if ( index !== -1 ) {
-            this._lecturers.splice( index, 1 );
-        }
-    }
+    IT = "IT",
+    Finance = "Finance",
+    Marketing = "Marketing"
 }
 
-class Lecturer
+//сутність - Компанія
+class Company
 {
-    _name: string;
-    _surname: string;
-    _position: string;
-    _company: string;
-    _experience: number;
-    _courses: string[];
-    _contacts: string;
-
-    constructor ( name: string, surname: string, position: string, company: string, experience: number, courses: string[], contacts: string )
-    {
-        this._name = name;
-        this._surname = surname;
-        this._position = position;
-        this._company = company;
-        this._experience = experience;
-        this._courses = courses;
-        this._contacts = contacts;
-    }
-
-}
-
-class Area
-{
-    // implement getters for fields and 'add/remove level' methods
-    _levels: Level[] = [];
-    _name: string;
+    private name: string; //має назву
+    private departmentList: Department[] = []; // список департаментів
+    private NewEmployeesList: NewEmployee[] = []; //список попередньо найнятого персоналу
+    private AllEmployeesList: Employee[] | NewEmployee[] = []; //список усього персоналу компанії - співробітники всіх департаментів і попередньо найняті
 
     constructor ( name: string )
     {
-        this._name = name;
+        this.name = name;
     }
 
-    get levels (): Level[]
+    //додати Департамент
+    addDepartment ( department: Department ): void
     {
-        return this._levels;
+        this.departmentList.push( department );
     }
-
-    get name (): string
+    //додати попередьо найнятого працівника
+    addNewEmployee ( employee: NewEmployee ): void
     {
-        return this._name;
+        this.NewEmployeesList.push( employee );
     }
-
-    set name ( value: string )
+    //отримати списко Департаментів
+    getdepartmentList (): Department[]
     {
-        this._name = value;
+        return this.departmentList;
     }
-
-    addLevel ( level: Level ): void
+    //отримати список попередьо найнятих працівників
+    getNewEmployeesList (): NewEmployee[]
     {
-        this._levels.push( level );
+        return this.NewEmployeesList;
     }
-
-    removeLevel ( level: Level ): void
+    //отримати список всіх працівників
+    getAllEmployeesList (): Employee[] | NewEmployee[]
     {
-        const index = this._levels.indexOf( level );
-        if ( index !== -1 ) {
-            this._levels.splice( index, 1 );
+        let AllEmployeesList: Employee[] | NewEmployee[] = [...this.NewEmployeesList,];
+        for ( let i of this.departmentList ) {
+            AllEmployeesList = AllEmployeesList.concat( i.getdepartmentEmployeeList() );
         }
+        return this.AllEmployeesList;
     }
+
+
 }
-
-class Level
+//Сутність Департамент
+class Department
 {
-    // implement getters for fields and 'add/remove group' methods
+    private name: string; // має назву
+    private domainArea: DomainArea; //доменну область
+    private departmentEmployeeList: Employee[] = []; //список своїх співробітників
+    //бюджет, що складається з дебіту і кредиту
+    private debit: number = 0;
+    private credit: number = 0;
 
-    _groups: Group[] = [];
-    _name: string;
-    _description: string;
-
-    constructor ( name: string, description: string )
+    constructor ( name: string, domainArea: DomainArea )
     {
-        this._name = name;
-        this._description = description;
+        this.name = name;
+        this.domainArea = domainArea;
     }
 
-    get groups (): Group[]
+    getdepartmentEmployeeList (): Employee[]
     {
-        return this._groups;
+        return this.departmentEmployeeList;
     }
 
-    get name (): string
+    getDepartmentName (): string
     {
-        return this._name;
+        return this.name;
     }
 
-    set name ( value: string )
+    getDomainArea (): DomainArea
     {
-        this._name = value;
+        return this.domainArea;
     }
 
-    get description (): string
+    get budget (): number
     {
-        return this._description;
+        return this.debit - this.credit;
     }
-
-    set description ( value: string )
+    //метод для обчислення балансу виходячи з поточного бюджету
+    calculateBalance (): number
     {
-        this._description = value;
+        return this.budget;
     }
-
-    addGroup ( group: Group ): void
+    //додавання нових співробітників який враховує зміни балансу і 
+    //перетворення з Попередньо найнятого на Співробітника або 
+    //видалення Співробітника з минулого відділу
+    addEmployee ( employee: Employee | NewEmployee ): void
     {
-        this._groups.push( group );
-    }
-
-    removeGroup ( group: Group ): void
-    {
-        const index = this._groups.indexOf( group );
-        if ( index !== -1 ) {
-            this._groups.splice( index, 1 );
+        if ( employee instanceof Employee ) {
+            this.departmentEmployeeList.push( employee );
+            employee.setDepartment( this.name );
         }
+        else {
+            this.departmentEmployeeList.push( employee.toEmployee( 'Active', this.name ) );
+        }
+        this.credit += employee.getSalary();
     }
+
+
+
 }
-
-class Group
+//сутність Бухгалтерія, яка є департаментом
+class AccountningDepartment extends Department
 {
-    // implement getters for fields and 'add/remove student' and 'set status' methods
+    private balance: number; //має властивість баланс
 
-    _area!: string;
-    _status!: string;
-    _students: Student[] = []; // Modify the array so that it has a valid toSorted method*
-    _directionName: string;
-    _levelName: string;
-
-    constructor ( directionName: string, levelName: string )
+    constructor ()
     {
-        this._directionName = directionName;
-        this._levelName = levelName;
+        super( 'Accounting', DomainArea.Finance );
+        this.balance = 0;
     }
 
-    get area (): string
+    // Метод для взяття на баланс співробітника або департаменту
+    takeOnBalance ( amount: Employee | Department ): void
     {
-        return this._area;
-    }
-
-    set area ( value: string )
-    {
-        this._area = value;
-    }
-
-    get status (): string
-    {
-        return this._status;
-    }
-
-    set status ( value: string )
-    {
-        this._status = value;
-    }
-
-    get directionName (): string
-    {
-        return this._directionName;
-    }
-
-    set directionName ( value: string )
-    {
-        this._directionName = value;
-    }
-
-    get levelName (): string
-    {
-        return this._levelName;
-    }
-
-    set levelName ( value: string )
-    {
-        this._levelName = value;
-    }
-    get students (): Student[]
-    {
-        return this._students;
-    }
-
-    addStudent ( student: Student ): void
-    {
-        this._students.push( student );
-    }
-
-    removeStudent ( student: Student ): void
-    {
-        const index = this._students.indexOf( student );
-        if ( index !== -1 ) {
-            this._students.splice( index, 1 );
+        if ( amount instanceof Employee ) {
+            this.balance += amount.getSalary();
+        }
+        else {
+            this.balance += amount.budget;
         }
     }
 
-    setStatus ( status: string ): void
+    // Метод для зняття з балансу
+    withdrawFromBalance ( amount: Employee | Department ): void
     {
-        this._status = status;
+        if ( amount instanceof Employee ) {
+            this.balance -= amount.getSalary();
+        }
+        else {
+            this.balance -= amount.budget;
+        }
     }
 
-    //As .toSorted is a new feature i've updated tsconfig.json to read: "lib": [
-    //"ESNext.Array",
-    //"DOM",
-    //"ESNext",
-    //]
-    showPerformance (): Student[]
+    // Метод для виплати зарплати для всього персоналу
+    paySalaries ( company: Company ): void
     {
-        const sortedStudents = this._students.toSorted( ( a, b ) => b.getPerformanceRating() - a.getPerformanceRating() );
-        return sortedStudents;
+        for ( const employee of company.getAllEmployeesList() ) {
+            if ( employee instanceof Employee && employee.getStatus() === 'Active' ) {
+                //платіж заробітної плати за допомогою внутрішніх виплат
+            }
+            else {
+                //платіж заробітної плати за допомогою зовнішніх виплат
+            }
+        }
+
     }
 }
 
-class Student
+
+//Сутність Попередньо найнятого співробітника
+class NewEmployee
 {
-    // implement 'set grade' and 'set visit' methods
+    private name: string; //має імʼя
+    private lastName: string; //прізвіще 
+    private salary: number;//зарплата
+    private bankDetails: string;//номер банківського рахунку
 
-    _firstName: string;
-    _lastName: string;
-    _birthYear: number;
-    _grades: { [workName: string]: number; } = {}; // workName: mark
-    _visits: { [lesson: string]: boolean; } = {}; // lesson: present
-
-    constructor ( firstName: string, lastName: string, birthYear: number )
+    constructor ( name: string, lastName: string, salary: number, bankDetails: string )
     {
-        this._firstName = firstName;
-        this._lastName = lastName;
-        this._birthYear = birthYear;
+        this.name = name;
+        this.lastName = lastName;
+        this.salary = salary;
+        this.bankDetails = bankDetails;
+
     }
 
-    get fullName (): string
+    getSalary ()
     {
-        return `${this._lastName} ${this._firstName}`;
+        return this.salary;
     }
-
-    set fullName ( value: string )
+    //Метод переведеення з Попередьонайнятого до Діючого Співробітника:
+    toEmployee ( status: "Active" | "Inactive" | "OnUnpaidLeave", department: string ): Employee
     {
-        [this._lastName, this._firstName] = value.split( ' ' );
-    }
-
-    get age (): number
-    {
-        return new Date().getFullYear() - this._birthYear;
-    }
-
-    // implement 'set grade' method
-    setGrade ( workName: string, mark: number ): void
-    {
-        this._grades[workName] = mark;
-    }
-
-    // implement 'set visit' method
-    setVisit ( lesson: string, present: boolean ): void
-    {
-        this._visits[lesson] = present;
-    }
-
-    getPerformanceRating (): number
-    {
-        const gradeValues: number[] = Object.values( this._grades );
-
-        if ( !gradeValues.length ) return 0;
-
-        const averageGrade: number = gradeValues.reduce( ( sum, grade ) => sum + grade, 0 ) / gradeValues.length;
-        const attendancePercentage: number =
-            ( Object.values( this._visits ).filter( present => present ).length / Object.values( this._visits ).length ) * 100;
-
-        return ( averageGrade + attendancePercentage ) / 2;
+        return new Employee( this.name, this.lastName, this.salary, this.bankDetails, status, department );
     }
 }
+
+
+//Сутність співробітника
+class Employee extends NewEmployee
+{
+    private status: "Active" | "Inactive" | "OnUnpaidLeave"; //статус
+    private department: string; //назву департаменту до якого прикріплений
+
+    constructor ( name: string, lastName: string, salary: number, bankDetails: string, status: "Active" | "Inactive" | "OnUnpaidLeave", department: string )
+    {
+        super( name, lastName, salary, bankDetails );
+        this.status = status;
+        this.department = department;
+    }
+
+    getStatus (): "Active" | "Inactive" | "OnUnpaidLeave"
+    {
+        return this.status;
+    }
+
+    getDepartment (): string
+    {
+        return this.department;
+    }
+
+    setDepartment ( department: string )
+    {
+        return department;
+    };
+}
+
+
