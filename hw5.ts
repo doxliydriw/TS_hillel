@@ -1,24 +1,30 @@
-class Circle
+interface Printable
 {
-    protected name: string = 'Circle';
-    protected color: string;
+    print (): void;
+}
+
+abstract class Shape
+{
+    readonly name: string;
+    readonly color: string;
+
+    constructor ( name: string, color: string )
+    {
+        this.name = name;
+        this.color = color;
+    }
+
+    abstract calculateArea (): number;
+}
+
+class Circle extends Shape
+{
     radius: number;
 
-
-    constructor ( color: string, radius: number )
+    constructor ( name: string, color: string, radius: number )
     {
-        this.color = color;
+        super( name, color );
         this.radius = radius;
-    }
-
-    get myname ()
-    {
-        return this.name;
-    }
-
-    get mycolor ()
-    {
-        return this.color;
     }
 
     calculateArea (): number
@@ -27,73 +33,60 @@ class Circle
     }
 }
 
-class Rectangle
+class Rectangle extends Shape implements Printable
 {
-    protected name: string = 'Rectangle';
-    protected color: string;
     sideOne: number;
     sideTwo: number;
 
-
-    constructor ( color: string, sideOne: number, sideTwo: number )
+    constructor ( name: string, color: string, sideOne: number, sideTwo: number )
     {
-        this.color = color;
+        super( name, color );
         this.sideOne = sideOne;
         this.sideTwo = sideTwo;
     }
 
-    get myname ()
-    {
-        return this.name;
-    }
-
-    get mycolor ()
-    {
-        return this.color;
-    }
-
     calculateArea (): number
     {
-        return ( this.sideOne * this.sideTwo );
+        return this.sideOne * this.sideTwo;
     }
 
     print (): void
     {
-        console.log( `Area of ${this.name} (${this.color}) is : length * width` );
+        console.log( `Area of ${this.name} (${this.color}) is: length * width` );
     }
 }
 
-class Square extends Rectangle
+class Square extends Shape
 {
-    constructor ( color: string, side: number )
-    {
-        super( color, side, side );
-        this.name = 'Square';
-    }
-}
-
-class Triangle
-{
-    protected name: string = 'Triangle';
-    protected color: string;
-    height: number;
     side: number;
 
-    constructor ( color: string, height: number, side: number )
+    constructor ( name: string, color: string, side: number )
     {
-        this.color = color;
-        this.height = height;
+        super( name, color );
         this.side = side;
     }
 
-    get myname ()
+    calculateArea (): number
     {
-        return this.name;
+        return ( this.side * this.side );
     }
 
-    get mycolor ()
+    print (): void
     {
-        return this.color;
+        console.log( `Area of ${this.name} (${this.color}) is : Side length * Side length` );
+    }
+}
+
+class Triangle extends Shape
+{
+    height: number;
+    side: number;
+
+    constructor ( name: string, color: string, height: number, side: number )
+    {
+        super( name, color );
+        this.height = height;
+        this.side = side;
     }
 
     calculateArea (): number
@@ -103,17 +96,17 @@ class Triangle
 }
 
 
-const myCircle = new Circle( 'Green', 5 );
-console.log( myCircle.mycolor, myCircle.myname, 'square is: ', myCircle.calculateArea() );
+const myCircle = new Circle( 'My circle', 'red', 5 );
+console.log( myCircle.name, 'square is: ', myCircle.calculateArea() );
 
-const myRectangle = new Rectangle( 'Blue', 5, 8 );
-console.log( myRectangle.mycolor, myRectangle.myname, 'square is: ', myRectangle.calculateArea() );
+const myRectangle = new Rectangle( 'My rectangle', 'blue', 5, 8 );
+console.log( myRectangle.name, 'square is: ', myRectangle.calculateArea() );
 myRectangle.print();
 
-const mySquare = new Square( 'Red', 2 );
-console.log( mySquare.mycolor, mySquare.myname, 'square is: ', mySquare.calculateArea() );
+const mySquare = new Square( 'My square', 'black', 2 );
+console.log( mySquare.name, 'square is: ', mySquare.calculateArea() );
 mySquare.print();
 
 
-const myTriangle = new Triangle( 'Yellow', 10, 18 );
-console.log( myTriangle.mycolor, myTriangle.myname, 'square is: ', myTriangle.calculateArea() );
+const myTriangle = new Triangle( 'My triangle', 'yellow', 10, 18 );
+console.log( myTriangle.name, 'square is: ', myTriangle.calculateArea() );
