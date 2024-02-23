@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "start": "tsc --watch"
   },
   "keywords": [],
   "author": "",
@@ -29,5 +30,8 @@
       "eslint ./ --max-warnings=0",
       "git add"
     ]
+  },
+  "dependencies": {
+    "uuidv4": "^6.2.13"
   }
 }
