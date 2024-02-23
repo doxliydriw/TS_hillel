@@ -91,7 +91,7 @@ interface iToDoList
 
 class ToDoList implements iToDoList
 {
-    private notes: INote[] = [];
+    protected notes: INote[] = [];
 
     get allCount (): number
     {
@@ -162,42 +162,30 @@ class ToDoList implements iToDoList
         const note = this.notes[noteIndex];
         note.complete();
     }
+}
 
-    /*
-        countNotesWithFalseStatus(): number;
-        {
-            return this.notes.filter( note => !note.status ).length;
-        }
-    
-    
-    noteSearch( query: string ): Note[];
+class ToDoListSearch extends ToDoList
+{
+    public searchNotesByTitle ( title: string ): INote[]
     {
-        const searchResults: Note[] = [];
-    
-        for ( const note of this.notes ) {
-            if ( note.title.includes( query ) || note.content.includes( query ) ) {
-                searchResults.push( note );
-            }
-        }
-    
-        return searchResults;
+        return this.notes.filter( note => note.title.includes( title ) );
     }
-    
-    sortNotes( sortBy: 'status' | 'date' ): void
+
+    public searchNotesByContent ( content: string ): INote[]
+    {
+        return this.notes.filter( note => note.content.includes( content ) );
+    }
+
+    public filterNotesByCreateDate ( startDate: Date, endDate: Date ): INote[]
+    {
+        return this.notes.filter( note =>
         {
-            if ( sortBy === 'status' ) {
-        this.notes.sort( ( a, b ) =>
-        {
-            if ( a.status === b.status ) {
-                return a.createDate.getTime() - b.createDate.getTime();
-            }
-            return a.status ? 1 : -1;
+            return note.createDate >= startDate && note.createDate <= endDate;
         } );
-    } else if ( sortBy === 'date' ) {
-        this.notes.sort( ( a, b ) => a.createDate.getTime() - b.createDate.getTime() );
-    } else {
-        throw new Error( 'Please insert date or status' );
     }
-        }
-    */
+
+    public filterNotesByCompletionStatus ( completed: boolean ): INote[]
+    {
+        return this.notes.filter( note => note.completed === completed );
+    }
 }
