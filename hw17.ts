@@ -4,6 +4,95 @@
 програму на основі наявних у вас знань.Використовуйте шаблони, можливості ТЗ і своє уявлення про прекрасне.
 */
 // Проєкт "Зоопарк":
+class Zoo
+{
+    name: string; //має назву
+    private departmentList: Department[] = []; // список департаментів
+    private AllEmployeesList: EmployeeList; //список усього персоналу компанії - співробітники всіх департаментів
+
+    constructor ( name: string, AllEmployeesList: EmployeeList )
+    {
+        this.name = name;
+        this.AllEmployeesList = AllEmployeesList;
+    }
+
+    //додати Департамент
+    addDepartment ( department: Department ): void
+    {
+        this.departmentList.push( department );
+    }
+    //отримати списко Департаментів
+    getdepartmentList (): Department[]
+    {
+        return this.departmentList;
+    }
+    //отримати список всіх працівників
+    getAllEmployeesList (): EmployeeList
+    {
+        return this.AllEmployeesList;
+    }
+}
+
+class Department
+{
+    name: string;
+    private employees: Employee[];
+    private budget: number = 0;
+
+    constructor ( name: string, employees: Employee[] )
+    {
+        this.name = name;
+        this.employees = employees;
+    }
+
+    getDepartmentName (): string
+    {
+        return this.name;
+    }
+
+    getEmployees (): Employee[]
+    {
+        return this.employees;
+    }
+
+    addEmployee ( employee: Employee ): void
+    {
+        this.employees.push( employee );
+        console.log( `Added ${employee.name} to the ${this.name} department.` );
+    }
+
+    removeEmployee ( employeeName: string ): void
+    {
+        const index = this.employees.findIndex( employee => employee.name === employeeName );
+        if ( index !== -1 ) {
+            const removedEmployee = this.employees.splice( index, 1 )[0];
+            console.log( `Removed ${removedEmployee.name} from the ${this.name} department.` );
+        } else {
+            console.log( `Employee with name ${employeeName} not found in the ${this.name} department.` );
+        }
+    }
+
+    setBudget ( amount: number ): void
+    {
+        this.budget = amount;
+        console.log( `Budget for ${this.name} department has been set to ${amount}.` );
+    }
+
+    getBudget (): number
+    {
+        return this.budget;
+    }
+
+    calculateExpenses (): number
+    {
+        let totalExpenses = 0;
+        this.employees.forEach( employee =>
+        {
+            totalExpenses += employee.salary;
+        } );
+        return totalExpenses;
+    }
+}
 
 //Квитки можуть бути трьох видів: дорослі, дитячі та сімейні.
 // Кожен квиток має вартість.
@@ -46,19 +135,22 @@ class Visitor implements IPerson
 }
 
 //"Каса":
-class TicketOffice
+class TicketOffice extends Department
 {
-    visitors: Visitor[] = [];
-    clients: Visitor[] = [];
-    ticketsSold: ITicket[] = [];
+    private visitors: Visitor[];
+    clients: Visitor[];
+    private ticketsSold: ITicket[];
     private closingTime: Date;
 
-    constructor ( closingTime: Date )
+    constructor ( name = 'Ticket office', closingTime: Date )
     {
+        super( name, [] );
+        this.visitors = [];
+        this.clients = [];
+        this.ticketsSold = [];
         this.closingTime = closingTime;
     }
 
-    //Відповідає за продаж квитків.
     sellTicket ( client: Visitor, ticketType: TicketType ): ITicket
     {
         const price = ticketType;
@@ -66,12 +158,10 @@ class TicketOffice
             type: ticketType,
             price: price
         };
-        // Під час продажу квитка, Каса додає дані про відвідувача у два списки: поточні відвідувачі та клієнти.
         this.addVisitor( client );
         return ticket;
     }
-    /* "Поточні відвідувачі":
-    Зберігає інформацію про відвідувачів, включаючи їхні імена та контактні дані. */
+
     addVisitor ( visitor: Visitor ): void
     {
         const isClient = this.clients.some( client => client.name === visitor.name && client.contacts === visitor.contacts );
@@ -80,11 +170,11 @@ class TicketOffice
         }
         this.visitors.push( visitor );
     }
-    //Можливість оповіщення відвідувачів за 15 хвилин до закриття і перед відходом.
+
     informBeforeClosing (): void
     {
         const timeUntilClosing = this.closingTime.getTime() - new Date().getTime();
-        if ( timeUntilClosing > 0 && timeUntilClosing <= 900000 ) { // 15 minutes = 900000 milliseconds
+        if ( timeUntilClosing > 0 && timeUntilClosing <= 900000 ) {
             const message = `The zoo will close in 15 minutes. Please start making your way to the exit.`;
             this.visitors.forEach( visitor => visitor.notify( message ) );
         }
@@ -94,7 +184,7 @@ class TicketOffice
     {
         const message = `Thank you for visiting the zoo. We hope you had a great time!`;
         visitor.notify( message );
-        this.visitors = this.visitors.filter( v => v !== visitor ); // Remove visitor from the list
+        this.visitors = this.visitors.filter( v => v !== visitor );
     }
 
     calculateDailyIncome (): number
@@ -116,12 +206,13 @@ class TicketOffice
 Використовує список клієнтів для розсилки новин про зоопарк і рекламні акції.
 */
 
-class Marketing
+class Marketing extends Department
 {
-    ticketOffice: TicketOffice;
+    private ticketOffice: TicketOffice;
 
     constructor ( ticketOffice: TicketOffice )
     {
+        super( "Marketing", [] );
         this.ticketOffice = ticketOffice;
     }
 
@@ -135,27 +226,92 @@ class Marketing
     }
 }
 
+
 /*
 "Виручка":
 Каса збирає дані про виручку за день.
 Ці дані передаються в Бухгалтерію.
 "Бухгалтерія":
 Відповідає за фінансове управління зоопарку.
-
 Розпоряджається бюджетом, включно з оплатою співробітників, закупівлею корму для тварин і обслуговуванням зоопарку.
-
 Зберігає дані про всіх співробітників, тварин і виплати.
-
 Можливість генерувати фінансові звіти.
+*/
 
+class Accounting extends Department
+{
+    private expenses: number = 0;
+
+    constructor ( name: string )
+    {
+        super( name, [] );
+    }
+
+    calculateCompanyExpenses ( departments: Department[] ): void
+    {
+        let totalExpenses = 0;
+        departments.forEach( department =>
+        {
+            totalExpenses += department.calculateExpenses();
+        } );
+        this.expenses = totalExpenses;
+    }
+
+    calculateCompanyBudget ( income: number ): number
+    {
+        // Assuming income is calculated from TicketOffice's calculateDailyIncome()
+        return income - this.expenses;
+    }
+
+    setBudget ( amount: number ): void
+    {
+        this.setBudget( amount );
+        console.log( `Budget for ${this.name} department has been set to ${amount}.` );
+    }
+
+    getBudget (): number
+    {
+        return this.getBudget();
+    }
+
+    paySalaries (): void
+    {
+
+    }
+}
+
+/*
 "Адміністрація":
-
 Відповідає за управління співробітниками і тваринами.
-
 Може додавати і видаляти співробітників і тварин.
-
 Створює сповіщення про рекламні акції та інші важливі події в зоопарку.
+*/
+class Administration extends Department
+{
+    private animalList: Animals;
+    private marketing: Marketing;
 
+    constructor ( name: string, employees: Employee[], animalList: Animals, marketing: Marketing )
+    {
+        super( name, employees );
+        this.animalList = animalList;
+        this.marketing = marketing;
+    }
+
+    addAnimal ( animal: Animal ): void
+    {
+        this.animalList.addAnimal( animal );
+        this.marketing.sendNotification( `New animal ${animal.name} has been added to the zoo.` );
+    }
+
+    removeAnimal ( animalName: string ): void
+    {
+        this.animalList.removeAnimal( animalName );
+        this.marketing.sendNotification( `Animal ${animalName} has been removed from the zoo.` );
+    }
+}
+
+/*
 "Тварини":
 Включає в себе інформацію про кожну тварину, таку як вид, ім'я, вік, здоров'я та інші характеристики.
 */
@@ -201,6 +357,7 @@ class Employee implements IPerson
     name: string;
     age: number;
     jobTitle: string;
+    private _salary: number = 0;
 
     constructor ( name: string, age: number, jobTitle: string )
     {
@@ -208,11 +365,26 @@ class Employee implements IPerson
         this.age = age;
         this.jobTitle = jobTitle;
     }
-
+    //Співробітники можуть мати різні посади та обов'язки, які слід враховувати.;
     changeJobTitle ( newTitle: string ): void
     {
         this.jobTitle = newTitle;
         console.log( `Changed ${this.name}'s job title to ${newTitle}.` );
+    }
+
+    setDepartment ( department: string )
+    {
+        return department;
+    };
+
+    get salary (): number
+    {
+        return this._salary;
+    }
+
+    set salary ( value: number )
+    {
+        this._salary = value;
     }
 }
 
@@ -246,7 +418,7 @@ class EmployeeList
 /*
 Адміністрація може додавати і видаляти співробітників.
 
-Співробітники можуть мати різні посади та обов'язки, які слід враховувати.;
+
 
 "Бюджет":
 
