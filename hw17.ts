@@ -134,6 +134,17 @@ class Visitor implements IPerson
     }
 }
 
+class ClientList
+{
+    clientlist: Visitor[] = [];
+    addClient ( client: Visitor ): void
+    {
+        if ( !this.clientlist.includes ) {
+            this.clientlist.push( client );
+        }
+    }
+}
+
 //"Каса":
 class TicketOffice extends Department
 {
