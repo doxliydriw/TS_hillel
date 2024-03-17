@@ -4,45 +4,17 @@
 програму на основі наявних у вас знань.Використовуйте шаблони, можливості ТЗ і своє уявлення про прекрасне.
 */
 // Проєкт "Зоопарк":
-class Zoo
-{
-    name: string; //має назву
-    private departmentList: Department[] = []; // список департаментів
-    private AllEmployeesList: EmployeeList; //список усього персоналу компанії - співробітники всіх департаментів
-
-    constructor ( name: string, AllEmployeesList: EmployeeList )
-    {
-        this.name = name;
-        this.AllEmployeesList = AllEmployeesList;
-    }
-
-    //додати Департамент
-    addDepartment ( department: Department ): void
-    {
-        this.departmentList.push( department );
-    }
-    //отримати списко Департаментів
-    getdepartmentList (): Department[]
-    {
-        return this.departmentList;
-    }
-    //отримати список всіх працівників
-    getAllEmployeesList (): EmployeeList
-    {
-        return this.AllEmployeesList;
-    }
-}
 
 class Department
 {
     name: string;
-    private employees: Employee[];
-    private budget: number = 0;
+    depEmployeeList: Employee[];
+    depBudget: number = 0;
 
     constructor ( name: string, employees: Employee[] )
     {
         this.name = name;
-        this.employees = employees;
+        this.depEmployeeList = employees;
     }
 
     getDepartmentName (): string
@@ -52,14 +24,16 @@ class Department
 
     getEmployees (): Employee[]
     {
-        return this.employees;
+        return this.depEmployeeList;
     }
 
+    /*
     addEmployee ( employee: Employee ): void
     {
         this.employees.push( employee );
         console.log( `Added ${employee.name} to the ${this.name} department.` );
     }
+    
 
     removeEmployee ( employeeName: string ): void
     {
@@ -71,22 +45,23 @@ class Department
             console.log( `Employee with name ${employeeName} not found in the ${this.name} department.` );
         }
     }
+*/
 
     setBudget ( amount: number ): void
     {
-        this.budget = amount;
+        this.depBudget = amount;
         console.log( `Budget for ${this.name} department has been set to ${amount}.` );
     }
 
     getBudget (): number
     {
-        return this.budget;
+        return this.depBudget;
     }
 
     calculateExpenses (): number
     {
         let totalExpenses = 0;
-        this.employees.forEach( employee =>
+        this.depEmployeeList.forEach( employee =>
         {
             totalExpenses += employee.salary;
         } );
@@ -107,12 +82,57 @@ interface ITicket
 {
     type: TicketType;
     price: number;
+    buyer: IPerson;
 }
 
 interface IPerson
 {
     name: string;
     age: number;
+}
+
+interface IObserver
+{
+    update ( observable: IObservable ): void;
+}
+
+interface IObservable
+{
+    attach ( observer: IObserver ): void;
+    detach ( observer: IObserver ): void;
+    notify (): void;
+}
+
+abstract class Observable implements IObservable
+{
+    private readonly observers: IObserver[] = [];
+    public attach ( observer: IObserver ): void
+    {
+        const isExist = this.observers.includes( observer );
+        if ( isExist )
+            return console.log( 'Observable: Observer has been already attached.' );
+        this.observers.push( observer );
+        console.log( 'Observable: Attached an observer' );
+
+    }
+
+    public detach ( observer: IObserver ): void
+    {
+        const obseverIndex = this.observers.indexOf( observer );
+
+        if ( obseverIndex === -1 )
+            return console.log( 'Observable: No such observer.' );
+        this.observers.splice( obseverIndex, 1 );
+        console.log( 'Observable: Detached on observer.' );
+    }
+
+    public notify (): void
+    {
+        console.log( 'Observable: Notifying observer:' );
+        for ( const observer of this.observers ) {
+            observer.update( this );
+        }
+    }
 }
 
 class Visitor implements IPerson
@@ -137,10 +157,10 @@ class Visitor implements IPerson
 //"Каса":
 class TicketOffice extends Department
 {
-    private visitors: Visitor[];
+    visitors: Visitor[];
     clients: Visitor[];
-    private ticketsSold: ITicket[];
-    private closingTime: Date;
+    ticketsSold: ITicket[];
+    closingTime: Date;
 
     constructor ( name = 'Ticket office', closingTime: Date )
     {
@@ -151,14 +171,15 @@ class TicketOffice extends Department
         this.closingTime = closingTime;
     }
 
-    sellTicket ( client: Visitor, ticketType: TicketType ): ITicket
+    sellTicket ( buyer: Visitor, ticketType: TicketType ): ITicket
     {
         const price = ticketType;
         const ticket: ITicket = {
             type: ticketType,
-            price: price
+            price: price,
+            buyer: buyer
         };
-        this.addVisitor( client );
+        this.addVisitor( buyer );
         return ticket;
     }
 
@@ -241,10 +262,12 @@ class Marketing extends Department
 class Accounting extends Department
 {
     private expenses: number = 0;
+    private ticketOffice: TicketOffice;
 
-    constructor ( name: string )
+    constructor ( ticketOffice: TicketOffice )
     {
-        super( name, [] );
+        super( "Marketing", [] );
+        this.ticketOffice = ticketOffice;
     }
 
     calculateCompanyExpenses ( departments: Department[] ): void
@@ -263,17 +286,6 @@ class Accounting extends Department
         return income - this.expenses;
     }
 
-    setBudget ( amount: number ): void
-    {
-        this.setBudget( amount );
-        console.log( `Budget for ${this.name} department has been set to ${amount}.` );
-    }
-
-    getBudget (): number
-    {
-        return this.getBudget();
-    }
-
     paySalaries (): void
     {
 
@@ -288,10 +300,10 @@ class Accounting extends Department
 */
 class Administration extends Department
 {
-    private animalList: Animals;
+    private animalList: Animal[];
     private marketing: Marketing;
 
-    constructor ( name: string, employees: Employee[], animalList: Animals, marketing: Marketing )
+    constructor ( name: string, employees: Employee[], animalList: Animal[], marketing: Marketing )
     {
         super( name, employees );
         this.animalList = animalList;
@@ -300,14 +312,19 @@ class Administration extends Department
 
     addAnimal ( animal: Animal ): void
     {
-        this.animalList.addAnimal( animal );
+        this.animalList.push( animal );
         this.marketing.sendNotification( `New animal ${animal.name} has been added to the zoo.` );
     }
 
     removeAnimal ( animalName: string ): void
     {
-        this.animalList.removeAnimal( animalName );
-        this.marketing.sendNotification( `Animal ${animalName} has been removed from the zoo.` );
+        const index = this.animalList.findIndex( animal => animal.name === animalName );
+        if ( index !== -1 ) {
+            const removedAnimal = this.animalList.splice( index, 1 )[0];
+            console.log( `Removed ${removedAnimal.name} from the list of animals.` );
+        } else {
+            console.log( `Animal with name ${animalName} not found.` );
+        }
     }
 }
 
@@ -315,39 +332,29 @@ class Administration extends Department
 "Тварини":
 Включає в себе інформацію про кожну тварину, таку як вид, ім'я, вік, здоров'я та інші характеристики.
 */
-interface Animal
+interface IAnimal
 {
-    class: string;
-    birth: Date;
+    animalClass: string;
+    birthDate: Date;
     name: string;
     healthStatus: string;
 }
 
-class Animals
+class Animal implements IAnimal
 {
-    listOfAnimals: Animal[];
+    animalClass: string;
+    birthDate: Date;
+    name: string;
+    healthStatus: string;
 
-    constructor ( animalList: Animal[] )
+    constructor ( animalClass: string, birthDate: Date, name: string, healthStatus: string ) 
     {
-        this.listOfAnimals = animalList;
+        this.animalClass = animalClass;
+        this.birthDate = birthDate;
+        this.name = name;
+        this.healthStatus = healthStatus;
     }
 
-    addAnimal ( animal: Animal ): void
-    {
-        this.listOfAnimals.push( animal );
-        console.log( `Added ${animal.name} to the list of animals.` );
-    }
-
-    removeAnimal ( animalName: string ): void
-    {
-        const index = this.listOfAnimals.findIndex( animal => animal.name === animalName );
-        if ( index !== -1 ) {
-            const removedAnimal = this.listOfAnimals.splice( index, 1 )[0];
-            console.log( `Removed ${removedAnimal.name} from the list of animals.` );
-        } else {
-            console.log( `Animal with name ${animalName} not found.` );
-        }
-    }
 }
 /*
 "Співробітники":
@@ -357,12 +364,14 @@ class Employee implements IPerson
     name: string;
     age: number;
     jobTitle: string;
+    department: string;
     private _salary: number = 0;
 
-    constructor ( name: string, age: number, jobTitle: string )
+    constructor ( name: string, age: number, department: string, jobTitle: string )
     {
         this.name = name;
         this.age = age;
+        this.department = department;
         this.jobTitle = jobTitle;
     }
     //Співробітники можуть мати різні посади та обов'язки, які слід враховувати.;
@@ -372,9 +381,9 @@ class Employee implements IPerson
         console.log( `Changed ${this.name}'s job title to ${newTitle}.` );
     }
 
-    setDepartment ( department: string )
+    changeDepartment ( department: string ): void
     {
-        return department;
+        this.department = department;
     };
 
     get salary (): number
@@ -426,3 +435,32 @@ class EmployeeList
 
 Можливість вести бюджетний облік і надавати фінансові звіти.;
 */
+
+class Zoo
+{
+    name: string; //має назву
+    private departmentList: Department[] = []; // список департаментів
+    private AllEmployeesList: EmployeeList; //список усього персоналу компанії - співробітники всіх департаментів
+
+    constructor ( name: string, AllEmployeesList: EmployeeList )
+    {
+        this.name = name;
+        this.AllEmployeesList = AllEmployeesList;
+    }
+
+    //додати Департамент
+    addDepartment ( department: Department ): void
+    {
+        this.departmentList.push( department );
+    }
+    //отримати списко Департаментів
+    getdepartmentList (): Department[]
+    {
+        return this.departmentList;
+    }
+    //отримати список всіх працівників
+    getAllEmployeesList (): EmployeeList
+    {
+        return this.AllEmployeesList;
+    }
+}
