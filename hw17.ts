@@ -133,7 +133,10 @@ class Visitor implements IPerson
         console.log( `${this.name}: ${message}` );
     }
 }
-
+/*"Клієнти":
+Дані клієнтів зберігаються у Відділу реклами.
+Відділ реклами використовує цей список для розсилки новин про зоопарк і рекламні акції.
+*/
 class ClientList
 {
     list: Visitor[] = [];
@@ -211,14 +214,9 @@ class TicketOffice extends Department
     }
 }
 
-/*"Клієнти":
-Дані клієнтів зберігаються у Відділу реклами.
-Відділ реклами використовує цей список для розсилки новин про зоопарк і рекламні акції.
-"Відділ реклами":
+/* "Відділ реклами":
 Відповідає за маркетингові та рекламні заходи.
-Використовує список клієнтів для розсилки новин про зоопарк і рекламні акції.
 */
-
 class Marketing extends Department
 {
     private clientsList: ClientList;
@@ -326,7 +324,7 @@ class Administration extends Department
             console.log( `Animal with name ${animalName} not found.` );
         }
     }
-
+    //Адміністрація може додавати і видаляти співробітників.
     addEmployee ( employee: Employee ): void
     {
         this.companyEmployeeList.addEmployee( employee );
@@ -442,10 +440,6 @@ class EmployeeList
 }
 
 /*
-Адміністрація може додавати і видаляти співробітників.
-
-
-
 "Бюджет":
 
 Бухгалтерія розпоряджається бюджетом і стежить за фінансами зоопарку.
