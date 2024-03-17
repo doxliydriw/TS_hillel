@@ -27,26 +27,6 @@ class Department
         return this.depEmployeeList;
     }
 
-    /*
-    addEmployee ( employee: Employee ): void
-    {
-        this.employees.push( employee );
-        console.log( `Added ${employee.name} to the ${this.name} department.` );
-    }
-    
-
-    removeEmployee ( employeeName: string ): void
-    {
-        const index = this.employees.findIndex( employee => employee.name === employeeName );
-        if ( index !== -1 ) {
-            const removedEmployee = this.employees.splice( index, 1 )[0];
-            console.log( `Removed ${removedEmployee.name} from the ${this.name} department.` );
-        } else {
-            console.log( `Employee with name ${employeeName} not found in the ${this.name} department.` );
-        }
-    }
-*/
-
     setBudget ( amount: number ): void
     {
         this.depBudget = amount;
@@ -326,6 +306,26 @@ class Administration extends Department
             console.log( `Animal with name ${animalName} not found.` );
         }
     }
+
+    /*
+        addEmployee ( employee: Employee ): void
+        {
+            this.employees.push( employee );
+            console.log( `Added ${employee.name} to the ${this.name} department.` );
+        }
+        
+    
+        removeEmployee ( employeeName: string ): void
+        {
+            const index = this.employees.findIndex( employee => employee.name === employeeName );
+            if ( index !== -1 ) {
+                const removedEmployee = this.employees.splice( index, 1 )[0];
+                console.log( `Removed ${removedEmployee.name} from the ${this.name} department.` );
+            } else {
+                console.log( `Employee with name ${employeeName} not found in the ${this.name} department.` );
+            }
+        }
+    */
 }
 
 /*
