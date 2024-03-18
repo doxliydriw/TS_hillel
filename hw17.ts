@@ -11,28 +11,23 @@ export class Department
         this.name = name;
         this.depEmployeeList = employees.getDepartmentList( name );
     }
-
     getDepartmentName (): string
     {
         return this.name;
     }
-
     getEmployees (): Employee[]
     {
         return this.depEmployeeList;
     }
-
     setBudget ( amount: number ): void
     {
         this.depBudget = amount;
         console.log( `Budget for ${this.name} department has been set to ${amount}.` );
     }
-
     getBudget (): number
     {
         return this.depBudget;
     }
-
     calculateExpenses (): number
     {
         let totalExpenses = 0;
@@ -52,20 +47,17 @@ enum TicketType
     child = 10,
     family = 50
 }
-
 interface ITicket
 {
     type: TicketType;
     price: number;
     buyer: IPerson;
 }
-
 interface IPerson
 {
     name: string;
     age: number;
 }
-
 /*
 interface IObserver
 {
@@ -111,7 +103,6 @@ abstract class Observable implements IObservable
     }
 }
 */
-
 export class Visitor implements IPerson
 {
     name: string;
@@ -124,7 +115,6 @@ export class Visitor implements IPerson
         this.age = age;
         this.contacts = contacts;
     }
-
     notify ( message: string )
     {
         console.log( `${this.name}: ${message}` );
@@ -161,7 +151,6 @@ export class TicketOffice extends Department
         this.ticketsSold = [];
         this.closingTime = closingTime;
     }
-
     /*Відповідає за продаж квитків.
     Під час продажу квитка, Каса додає дані про відвідувача у два списки:
     поточні відвідувачі та клієнти.
@@ -178,7 +167,6 @@ export class TicketOffice extends Department
         this.addVisitor( buyer );
         return ticket;
     }
-
     addVisitor ( visitor: Visitor ): void
     {
         this.clients.addClient( visitor );
@@ -193,14 +181,12 @@ export class TicketOffice extends Department
             this.visitors.forEach( visitor => visitor.notify( message ) );
         }
     }
-
     informOnLeaving ( visitor: Visitor ): void
     {
         const message = `Thank you for visiting the zoo. We hope you had a great time!`;
         visitor.notify( message );
         this.visitors = this.visitors.filter( v => v !== visitor );
     }
-
     calculateDailyIncome (): number
     {
         let totalIncome = 0;
@@ -258,7 +244,6 @@ export class Accounting extends Department
         this.ticketOffice = ticketOffice;
         this.companyBubget = companyBudget;
     }
-
     calculateCompanyExpenses ( departments: Department[] ): void
     {
         let totalExpenses = 0;
@@ -268,12 +253,10 @@ export class Accounting extends Department
         } );
         this.expenses = totalExpenses;
     }
-
     calculateCompanyBudget ( income: number ): number
     {
         return income - this.expenses;
     }
-
     paySalary ( employee: Employee ): void
     {
         this.companyBubget - employee.salary;
@@ -304,13 +287,11 @@ export class Administration extends Department
         this.marketing = marketing;
         this.companyEmployeeList = employees;
     }
-
     addAnimal ( animal: Animal ): void
     {
         this.animalList.push( animal );
         this.marketing.sendNotification( `New animal ${animal.name} has been added to the zoo.` );
     }
-
     removeAnimal ( animalName: string ): void
     {
         const index = this.animalList.findIndex( animal => animal.name === animalName );
@@ -326,12 +307,10 @@ export class Administration extends Department
     {
         this.companyEmployeeList.addEmployee( employee );
     }
-
     removeEmployee ( employeeName: string ): void
     {
         this.companyEmployeeList.removeEmployee( employeeName );
     }
-
     createCampaign ( message: string )
     {
         this.marketing.sendNotification( message );
@@ -349,7 +328,6 @@ interface IAnimal
     name: string;
     healthStatus: string;
 }
-
 export class Animal implements IAnimal
 {
     animalClass: string;
@@ -406,7 +384,6 @@ export class Employee implements IPerson
         this._salary = value;
     }
 }
-
 export class EmployeeList
 {
     employees: Employee[];
@@ -445,7 +422,6 @@ export class EmployeeList
         }
     }
 }
-
 /*
 "Бюджет":
 
@@ -465,7 +441,6 @@ export class Zoo
         this.name = name;
         this.AllEmployeesList = AllEmployeesList;
     }
-
     //додати Департамент
     addDepartment ( department: Department ): void
     {
