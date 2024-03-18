@@ -1,20 +1,15 @@
-/* До нас звернувся невеликий приватний зоопарк для створення застосунку, 
-який полегшить управління бізнесом.Нижче опис сутностей, які є на даний момент.
-Вам необхідно ознайомиться, поставити уточнювальні запитання, після чого побудувати 
-програму на основі наявних у вас знань.Використовуйте шаблони, можливості ТЗ і своє уявлення про прекрасне.
-*/
 // Проєкт "Зоопарк":
 
-class Department
+export class Department
 {
     name: string;
     depEmployeeList: Employee[];
     depBudget: number = 0;
 
-    constructor ( name: string, employees: Employee[] )
+    constructor ( name: string, employees: EmployeeList )
     {
         this.name = name;
-        this.depEmployeeList = employees;
+        this.depEmployeeList = employees.getDepartmentList( name );
     }
 
     getDepartmentName (): string
@@ -71,6 +66,7 @@ interface IPerson
     age: number;
 }
 
+/*
 interface IObserver
 {
     update ( observable: IObservable ): void;
@@ -114,8 +110,9 @@ abstract class Observable implements IObservable
         }
     }
 }
+*/
 
-class Visitor implements IPerson
+export class Visitor implements IPerson
 {
     name: string;
     age: number;
@@ -137,7 +134,7 @@ class Visitor implements IPerson
 Дані клієнтів зберігаються у Відділу реклами.
 Відділ реклами використовує цей список для розсилки новин про зоопарк і рекламні акції.
 */
-class ClientList
+export class ClientList
 {
     list: Visitor[] = [];
     addClient ( client: Visitor ): void
@@ -149,23 +146,27 @@ class ClientList
 }
 
 //"Каса":
-class TicketOffice extends Department
+export class TicketOffice extends Department
 {
     visitors: Visitor[];
     clients: ClientList;
     ticketsSold: ITicket[];
     closingTime: Date;
 
-    constructor ( name = 'Ticket office', closingTime: Date )
+    constructor ( name = 'Ticket office', employees: EmployeeList, closingTime: Date )
     {
-        super( name, [] );
+        super( name, employees );
         this.visitors = [];
         this.clients = new ClientList();
         this.ticketsSold = [];
         this.closingTime = closingTime;
     }
 
-    //Відповідає за продаж квитків.
+    /*Відповідає за продаж квитків.
+    Під час продажу квитка, Каса додає дані про відвідувача у два списки:
+    поточні відвідувачі та клієнти.
+    Зберігає інформацію про відвідувачів, включаючи їхні імена та контактні дані.
+    */
     sellTicket ( buyer: Visitor, ticketType: TicketType ): ITicket
     {
         const price = ticketType;
@@ -177,10 +178,7 @@ class TicketOffice extends Department
         this.addVisitor( buyer );
         return ticket;
     }
-    /* Під час продажу квитка, Каса додає дані про відвідувача у два списки: 
-    поточні відвідувачі та клієнти.
-    Зберігає інформацію про відвідувачів, включаючи їхні імена та контактні дані.
-    */
+
     addVisitor ( visitor: Visitor ): void
     {
         this.clients.addClient( visitor );
@@ -217,13 +215,13 @@ class TicketOffice extends Department
 /* "Відділ реклами":
 Відповідає за маркетингові та рекламні заходи.
 */
-class Marketing extends Department
+export class Marketing extends Department
 {
     private clientsList: ClientList;
 
-    constructor ( clientsList: ClientList )
+    constructor ( clientsList: ClientList, employees: EmployeeList )
     {
-        super( "Marketing", [] );
+        super( "Marketing", employees );
         this.clientsList = clientsList;
     }
     //Відділ реклами використовує цей список для розсилки новин про зоопарк і рекламні акції.
@@ -248,15 +246,15 @@ class Marketing extends Department
 Можливість генерувати фінансові звіти.
 */
 
-class Accounting extends Department
+export class Accounting extends Department
 {
     private expenses: number = 0;
     private ticketOffice: TicketOffice;
     companyBubget: number;
 
-    constructor ( ticketOffice: TicketOffice, companyBudget: number )
+    constructor ( ticketOffice: TicketOffice, employees: EmployeeList, companyBudget: number )
     {
-        super( "Marketing", [] );
+        super( "Marketing", employees );
         this.ticketOffice = ticketOffice;
         this.companyBubget = companyBudget;
     }
@@ -288,7 +286,7 @@ class Accounting extends Department
 
 Створює сповіщення про рекламні акції та інші важливі події в зоопарку.
 */
-class Administration extends Department
+export class Administration extends Department
 {
     private animalList: Animal[];
     private marketing: Marketing;
@@ -296,16 +294,15 @@ class Administration extends Department
 
     constructor (
         name: string,
-        employees: Employee[],
+        employees: EmployeeList,
         animalList: Animal[],
         marketing: Marketing,
-        companyEmployeeList: EmployeeList
     )
     {
         super( name, employees );
         this.animalList = animalList;
         this.marketing = marketing;
-        this.companyEmployeeList = companyEmployeeList;
+        this.companyEmployeeList = employees;
     }
 
     addAnimal ( animal: Animal ): void
@@ -334,6 +331,11 @@ class Administration extends Department
     {
         this.companyEmployeeList.removeEmployee( employeeName );
     }
+
+    createCampaign ( message: string )
+    {
+        this.marketing.sendNotification( message );
+    }
 }
 
 /*
@@ -348,7 +350,7 @@ interface IAnimal
     healthStatus: string;
 }
 
-class Animal implements IAnimal
+export class Animal implements IAnimal
 {
     animalClass: string;
     birthDate: Date;
@@ -367,7 +369,7 @@ class Animal implements IAnimal
 /*
 "Співробітники":
 */
-class Employee implements IPerson
+export class Employee implements IPerson
 {
     name: string;
     age: number;
@@ -405,13 +407,18 @@ class Employee implements IPerson
     }
 }
 
-class EmployeeList
+export class EmployeeList
 {
     employees: Employee[];
 
     constructor ( employees: Employee[] )
     {
         this.employees = employees;
+    }
+
+    getDepartmentList ( departmentName: string ): Employee[]
+    {
+        return this.employees.filter( ( employee ) => employee.department === departmentName );
     }
 
     findEmployee ( name: string ): boolean
@@ -447,7 +454,7 @@ class EmployeeList
 Можливість вести бюджетний облік і надавати фінансові звіти.;
 */
 
-class Zoo
+export class Zoo
 {
     name: string; //має назву
     private departmentList: Department[] = []; // список департаментів
@@ -475,55 +482,3 @@ class Zoo
         return this.AllEmployeesList;
     }
 }
-
-// Create some employees
-const employee1 = new Employee( "John Doe", 30, "Administration", "Manager" );
-const employee2 = new Employee( "Jane Smith", 25, "Marketing", "Marketing Coordinator" );
-
-// Create an employee list and add employees to it
-const employeeList = new EmployeeList( [employee1, employee2] );
-
-// Create a ticket office with closing time
-const ticketOffice = new TicketOffice( "Ticket Office", new Date( "2024-03-15T17:00:00" ) );
-
-// Create a marketing department
-const marketing = new Marketing( new ClientList() );
-
-// Create an administration department
-const administration = new Administration( "Administration", [employee1], [], marketing, employeeList );
-
-// Create a zoo
-const zoo = new Zoo( "My Zoo", employeeList );
-
-// Add departments to the zoo
-zoo.addDepartment( marketing );
-zoo.addDepartment( administration );
-
-// Sell some tickets
-const visitor1 = new Visitor( "Alice", 25, "alice@example.com" );
-const ticket1 = ticketOffice.sellTicket( visitor1, TicketType.adult );
-const visitor2 = new Visitor( "Bob", 35, "bob@example.com" );
-const ticket2 = ticketOffice.sellTicket( visitor2, TicketType.child );
-
-// Inform visitors before closing time
-ticketOffice.informBeforeClosing();
-
-// Inform a visitor upon leaving
-ticketOffice.informOnLeaving( visitor1 );
-
-// Calculate daily income
-const dailyIncome = ticketOffice.calculateDailyIncome();
-
-// Create an accounting department with a budget
-const accounting = new Accounting( ticketOffice, 10000 );
-
-// Calculate company expenses
-accounting.calculateCompanyExpenses( zoo.getdepartmentList() );
-
-// Calculate company budget
-const companyBudget = accounting.calculateCompanyBudget( dailyIncome );
-
-// Pay salary to an employee
-accounting.paySalary( employee1 );
-
-console.log( `Company budget after all calculations: ${companyBudget}` );
